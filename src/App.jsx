@@ -9,10 +9,22 @@ import {
 	SimpleGrid,
 	Text,
 	Container,
+	extendTheme,
+	ChakraProvider,
+	Card,
 } from '@chakra-ui/react';
 import { Alchemy, Network, Utils } from 'alchemy-sdk';
 import { useState } from 'react';
 import { Oval } from 'react-loader-spinner';
+
+const customTheme = extendTheme({
+	colors: {
+		background: '#0B2447',
+		cardColor: '#19376D',
+		btnColor: '#576CBC',
+		secondary: '#A5D7E8',
+	},
+});
 
 function App() {
 	const [userAddress, setUserAddress] = useState('');
@@ -60,109 +72,196 @@ function App() {
 			setIsLoading(false);
 		}, 1000);
 	}
-
+	const maxLength = 14;
 	return (
-		<Box w='100vw'>
-			<Container maxW='container.sm' padding='4'>
+		<ChakraProvider theme={customTheme}>
+			<Box minHeight='100vh' w='100vw' bgColor='background'>
 				<Box
 					display='flex'
 					justifyContent='flex-end'
 					alignItems='center'
 					height='50px'
-					paddingRight='20px'>
+					pt={5}
+					pr={10}>
 					<Button
-						bgColor='blue'
+						bgColor='btnColor'
 						size='md'
 						onClick={connectWallet}
-						focusBorderColor='none'>
+						focusBorderColor='none'
+						color='white'
+						borderRadius={20}
+						_hover={{
+							backgroundColor: '#8a9ce2',
+							color: 'white',
+						}}>
 						Connect Wallet
 					</Button>
 				</Box>
-				<Center>
+				<Center flexDirection={'column'} h={'75vh'}>
 					<Flex
 						alignItems={'center'}
 						justifyContent='center'
 						flexDirection={'column'}>
-						<Heading mb={0} fontSize={36}>
+						<Heading mb={0} fontSize={48} color='secondary'>
 							ERC-20 Token Indexer
 						</Heading>
-						<Text>
+						<Text color='gray'>
 							Plug in an address and this website will return all of its ERC-20
 							token balances!
 						</Text>
 					</Flex>
-				</Center>
-				<Flex
-					w='100%'
-					flexDirection='column'
-					alignItems='center'
-					justifyContent={'center'}>
-					<Heading mt={42}>
-						Get all the ERC-20 token balances of this address:
-					</Heading>
-					<Input
-						onChange={(e) => setUserAddress(e.target.value)}
-						color='black'
-						w='600px'
-						textAlign='center'
-						p={4}
-						bgColor='white'
-						fontSize={24}
-						value={userAddress}
-					/>
-					<Button
-						fontSize={20}
-						onClick={getTokenBalance}
-						mt={36}
-						bgColor='blue'>
-						Check ERC-20 Token Balances
-					</Button>
+					<Box w='100%' mt={10}>
+						<Center>
+							<Flex flexDirection={'column'}>
+								<Input
+									onChange={(e) => setUserAddress(e.target.value)}
+									color='black'
+									textAlign='center'
+									// p={4}
+									bgColor='white'
+									fontSize={24}
+									value={userAddress}
+									width='900px'
+									size='lg'
+									borderRadius={20}
+									mb={19}
+								/>
 
-					<Heading my={36}>ERC-20 token balances:</Heading>
+								<Button
+									fontSize={20}
+									onClick={getTokenBalance}
+									mt={10}
+									bgColor='btnColor'
+									color='white'
+									display={'block'}
+									width='350px'
+									textAlign={'center'}
+									borderRadius={20}
+									size={'lg'}
+									m={'auto'}
+									_hover={{
+										backgroundColor: '#8a9ce2',
+										color: 'white',
+									}}>
+									Check ERC-20 Token Balances
+								</Button>
+							</Flex>
+						</Center>
+					</Box>
+				</Center>
+				<Box>
 					{isLoading ? (
-						<Oval
-							height={80}
-							width={80}
-							color='#4fa94d'
-							wrapperStyle={{}}
-							wrapperClass=''
-							visible={true}
-							ariaLabel='oval-loading'
-							secondaryColor='#4fa94d'
-							strokeWidth={2}
-							strokeWidthSecondary={2}
-						/>
+						<Center>
+							<Oval
+								height={80}
+								width={80}
+								color='#A5D7E8'
+								wrapperStyle={{}}
+								wrapperClass=''
+								visible={true}
+								ariaLabel='oval-loading'
+								secondaryColor='#A5D7E8'
+								strokeWidth={2}
+								strokeWidthSecondary={2}
+							/>
+						</Center>
 					) : hasQueried ? (
-						<SimpleGrid w={'90vw'} columns={4} spacing={24}>
-							{results.tokenBalances.map((e, i) => {
-								return (
-									<Flex
-										flexDir={'column'}
-										color='white'
-										bg='blue'
-										w={'20vw'}
-										key={e.id}>
-										<Box>
-											<b>Symbol:</b> ${tokenDataObjects[i].symbol}&nbsp;
-										</Box>
-										<Box>
-											<b>Balance:</b>&nbsp;
-											{Utils.formatUnits(
-												e.tokenBalance,
-												tokenDataObjects[i].decimals,
-											)}
-										</Box>
-										<Image src={tokenDataObjects[i].logo} />
-									</Flex>
-								);
-							})}
-						</SimpleGrid>
+						<Box p={10}>
+							<Heading
+								my={25}
+								color='secondary'
+								fontSize={28}
+								textAlign={'center'}>
+								Here are the ERC-20 token balances
+							</Heading>
+							<SimpleGrid w={'90vw'} columns={4} spacing={24}>
+								{results.tokenBalances.map((e, i) => {
+									return (
+										<Card
+											bg='#19376D'
+											borderRadius={20}
+											p='4'
+											color='white'
+											w='300px'
+											key={e.id}>
+											<Box display='flex' alignItems='center'>
+												<Image
+													src={tokenDataObjects[i].logo}
+													alt='Your image'
+													h='50px'
+													w='50px'
+													mr='4'
+												/>
+												<Box>
+													<Box fontSize='md'>
+														<b>Symbol:</b> ${tokenDataObjects[i].symbol}&nbsp;
+													</Box>
+													<Box fontSize='md'>
+														Balance:&nbsp;
+														{Utils.formatUnits(
+															e.tokenBalance,
+															tokenDataObjects[i].decimals,
+														)
+															.toString()
+															.slice(0, 11).length <
+														Utils.formatUnits(
+															e.tokenBalance,
+															tokenDataObjects[i].decimals,
+														).toString().length
+															? Utils.formatUnits(
+																	e.tokenBalance,
+																	tokenDataObjects[i].decimals,
+															  )
+																	.toString()
+																	.slice(0, 11) + '...'
+															: Utils.formatUnits(
+																	e.tokenBalance,
+																	tokenDataObjects[i].decimals,
+															  )}
+													</Box>
+												</Box>
+											</Box>
+										</Card>
+										// <Flex
+										// 	flexDir={'column'}
+										// 	color='white'
+										// 	bg='blue'
+										// 	w={'20vw'}
+										// 	>
+										// 	<Box>
+
+										// 	</Box>
+										// 	<Box>
+
+										// 	</Box>
+										// 	<Image  />
+										// </Flex>
+									);
+								})}
+							</SimpleGrid>
+						</Box>
 					) : (
-						'Please make a query! This may take a few seconds...'
+						<Card bg='#19376D' borderRadius='md' p='4' color='white' w='300px'>
+							<Box display='flex' alignItems='center'>
+								<Image
+									src='your-image-src.png'
+									alt='Your image'
+									h='50px'
+									w='50px'
+									mr='4'
+								/>
+								<Box>
+									<Box fontSize='lg'>:$TUSD</Box>
+									<Box fontSize='2xl' fontWeight='bold'>
+										200000
+									</Box>
+								</Box>
+							</Box>
+						</Card>
 					)}
-				</Flex>
-			</Container>
-		</Box>
+				</Box>
+			</Box>
+		</ChakraProvider>
 	);
 }
 

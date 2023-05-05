@@ -8,18 +8,18 @@ import {
 	Input,
 	SimpleGrid,
 	Text,
-	Spacer,
 	Container,
 } from '@chakra-ui/react';
 import { Alchemy, Network, Utils } from 'alchemy-sdk';
 import { useState } from 'react';
-import { ethers } from 'ethers';
+import { Oval } from 'react-loader-spinner';
 
 function App() {
 	const [userAddress, setUserAddress] = useState('');
 	const [results, setResults] = useState([]);
 	const [hasQueried, setHasQueried] = useState(false);
 	const [tokenDataObjects, setTokenDataObjects] = useState([]);
+	const [isLoading, setIsLoading] = useState(false);
 	const connectWallet = async () => {
 		try {
 			// Request account access
@@ -35,32 +35,32 @@ function App() {
 	};
 
 	async function getTokenBalance() {
+		setIsLoading(true);
 		const config = {
 			apiKey: import.meta.env.VITE_API_KEY,
 			network: Network.ETH_MAINNET,
 		};
+		const alchemy = new Alchemy(config);
+		const data = await alchemy.core.getTokenBalances(userAddress);
 
-		if (connectWallet) {
-			const alchemy = new Alchemy(config);
-			const data = await alchemy.core.getTokenBalances(userAddress);
+		setResults(data);
 
-			setResults(data);
+		const tokenDataPromises = [];
 
-			const tokenDataPromises = [];
-
-			for (let i = 0; i < data.tokenBalances.length; i++) {
-				const tokenData = alchemy.core.getTokenMetadata(
-					data.tokenBalances[i].contractAddress,
-				);
-				tokenDataPromises.push(tokenData);
-			}
-
-			setTokenDataObjects(await Promise.all(tokenDataPromises));
-			setHasQueried(true);
-		} else {
-			console.log('connect your wallet');
+		for (let i = 0; i < data.tokenBalances.length; i++) {
+			const tokenData = alchemy.core.getTokenMetadata(
+				data.tokenBalances[i].contractAddress,
+			);
+			tokenDataPromises.push(tokenData);
 		}
+
+		setTokenDataObjects(await Promise.all(tokenDataPromises));
+		setHasQueried(true);
+		setTimeout(() => {
+			setIsLoading(false);
+		}, 1000);
 	}
+
 	return (
 		<Box w='100vw'>
 			<Container maxW='container.sm' padding='4'>
@@ -119,8 +119,20 @@ function App() {
 					</Button>
 
 					<Heading my={36}>ERC-20 token balances:</Heading>
-
-					{hasQueried ? (
+					{isLoading ? (
+						<Oval
+							height={80}
+							width={80}
+							color='#4fa94d'
+							wrapperStyle={{}}
+							wrapperClass=''
+							visible={true}
+							ariaLabel='oval-loading'
+							secondaryColor='#4fa94d'
+							strokeWidth={2}
+							strokeWidthSecondary={2}
+						/>
+					) : hasQueried ? (
 						<SimpleGrid w={'90vw'} columns={4} spacing={24}>
 							{results.tokenBalances.map((e, i) => {
 								return (

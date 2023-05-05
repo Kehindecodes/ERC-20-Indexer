@@ -23,7 +23,11 @@ function App() {
 	const connectWallet = async () => {
 		try {
 			// Request account access
-			await window.ethereum.request({ method: 'eth_requestAccounts' });
+			const wallet = await window.ethereum.request({
+				method: 'eth_requestAccounts',
+			});
+			setUserAddress(wallet[0]);
+			console.log(wallet[0]);
 			console.log('Wallet connected');
 		} catch (error) {
 			console.log('Failed to connect wallet');
@@ -36,7 +40,7 @@ function App() {
 			network: Network.ETH_MAINNET,
 		};
 
-		if (connectWallet && userAddress !== '') {
+		if (connectWallet) {
 			const alchemy = new Alchemy(config);
 			const data = await alchemy.core.getTokenBalances(userAddress);
 
@@ -104,6 +108,7 @@ function App() {
 						p={4}
 						bgColor='white'
 						fontSize={24}
+						value={userAddress}
 					/>
 					<Button
 						fontSize={20}

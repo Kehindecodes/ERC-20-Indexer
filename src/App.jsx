@@ -13,6 +13,9 @@ import {
 	ChakraProvider,
 	Card,
 	useToast,
+	Alert,
+	AlertIcon,
+	AlertTitle,
 } from '@chakra-ui/react';
 import { Alchemy, Network, Utils } from 'alchemy-sdk';
 import { useState } from 'react';
@@ -33,6 +36,7 @@ function App() {
 	const [hasQueried, setHasQueried] = useState(false);
 	const [tokenDataObjects, setTokenDataObjects] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const [showError, setShowError] = useState(false);
 	const toast = useToast();
 	const connectWallet = async () => {
 		try {
@@ -57,32 +61,45 @@ function App() {
 
 	async function getTokenBalance() {
 		setIsLoading(true);
-		try {
-			const config = {
-				apiKey: import.meta.env.VITE_API_KEY,
-				network: Network.ETH_MAINNET,
-			};
-			const alchemy = new Alchemy(config);
-			const data = await alchemy.core.getTokenBalances(userAddress);
+		if (userAddress === '') {
+			setShowError(true);
+		} else {
+			setShowError(false);
+			try {
+				const config = {
+					apiKey: import.meta.env.VITE_API_KEY,
+					network: Network.ETH_MAINNET,
+				};
+				const alchemy = new Alchemy(config);
+				const data = await alchemy.core.getTokenBalances(userAddress);
 
-			setResults(data);
+				setResults(data);
 
-			const tokenDataPromises = [];
+				const tokenDataPromises = [];
 
-			for (let i = 0; i < data.tokenBalances.length; i++) {
-				const tokenData = alchemy.core.getTokenMetadata(
-					data.tokenBalances[i].contractAddress,
-				);
-				tokenDataPromises.push(tokenData);
-			}
+				for (let i = 0; i < data.tokenBalances.length; i++) {
+					const tokenData = alchemy.core.getTokenMetadata(
+						data.tokenBalances[i].contractAddress,
+					);
+					tokenDataPromises.push(tokenData);
+				}
 
-			setTokenDataObjects(await Promise.all(tokenDataPromises));
-			setHasQueried(true);
-			setTimeout(() => {
+				setTokenDataObjects(await Promise.all(tokenDataPromises));
+				setHasQueried(true);
+				setTimeout(() => {
+					setIsLoading(false);
+				}, 1000);
+			} catch (error) {
+				console.log('Failed to fetch data:', error);
 				setIsLoading(false);
-			}, 1000);
-		} catch (error) {
-			console.log('Failed to fetch data:', error);
+				toast({
+					title: 'An error occurred',
+					description: ' Alchemy API Request Failed',
+					status: 'error',
+					duration: 5000,
+					isClosable: true,
+				});
+			}
 		}
 	}
 	const maxLength = 14;
@@ -126,6 +143,13 @@ function App() {
 					<Box w='100%' mt={10}>
 						<Center>
 							<Flex flexDirection={'column'}>
+								{showError && (
+									<Alert status='error' mb={4}>
+										<AlertIcon />
+										<AlertTitle>Error:</AlertTitle>
+										Please enter an address
+									</Alert>
+								)}
 								<Input
 									onChange={(e) => setUserAddress(e.target.value)}
 									color='black'
@@ -138,6 +162,7 @@ function App() {
 									size='lg'
 									borderRadius={20}
 									mb={19}
+									placeholder='Enter an address'
 								/>
 
 								<Button

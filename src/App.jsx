@@ -12,6 +12,7 @@ import {
 	extendTheme,
 	ChakraProvider,
 	Card,
+	useToast,
 } from '@chakra-ui/react';
 import { Alchemy, Network, Utils } from 'alchemy-sdk';
 import { useState } from 'react';
@@ -32,6 +33,7 @@ function App() {
 	const [hasQueried, setHasQueried] = useState(false);
 	const [tokenDataObjects, setTokenDataObjects] = useState([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const toast = useToast();
 	const connectWallet = async () => {
 		try {
 			// Request account access
@@ -43,34 +45,45 @@ function App() {
 			console.log('Wallet connected');
 		} catch (error) {
 			console.log('Failed to connect wallet');
+			toast({
+				title: 'Error',
+				description: 'Failed to connect wallet',
+				status: 'error',
+				duration: 5000,
+				isClosable: true,
+			});
 		}
 	};
 
 	async function getTokenBalance() {
 		setIsLoading(true);
-		const config = {
-			apiKey: import.meta.env.VITE_API_KEY,
-			network: Network.ETH_MAINNET,
-		};
-		const alchemy = new Alchemy(config);
-		const data = await alchemy.core.getTokenBalances(userAddress);
+		try {
+			const config = {
+				apiKey: import.meta.env.VITE_API_KEY,
+				network: Network.ETH_MAINNET,
+			};
+			const alchemy = new Alchemy(config);
+			const data = await alchemy.core.getTokenBalances(userAddress);
 
-		setResults(data);
+			setResults(data);
 
-		const tokenDataPromises = [];
+			const tokenDataPromises = [];
 
-		for (let i = 0; i < data.tokenBalances.length; i++) {
-			const tokenData = alchemy.core.getTokenMetadata(
-				data.tokenBalances[i].contractAddress,
-			);
-			tokenDataPromises.push(tokenData);
+			for (let i = 0; i < data.tokenBalances.length; i++) {
+				const tokenData = alchemy.core.getTokenMetadata(
+					data.tokenBalances[i].contractAddress,
+				);
+				tokenDataPromises.push(tokenData);
+			}
+
+			setTokenDataObjects(await Promise.all(tokenDataPromises));
+			setHasQueried(true);
+			setTimeout(() => {
+				setIsLoading(false);
+			}, 1000);
+		} catch (error) {
+			console.log('Failed to fetch data:', error);
 		}
-
-		setTokenDataObjects(await Promise.all(tokenDataPromises));
-		setHasQueried(true);
-		setTimeout(() => {
-			setIsLoading(false);
-		}, 1000);
 	}
 	const maxLength = 14;
 	return (
@@ -241,23 +254,7 @@ function App() {
 							</SimpleGrid>
 						</Box>
 					) : (
-						<Card bg='#19376D' borderRadius='md' p='4' color='white' w='300px'>
-							<Box display='flex' alignItems='center'>
-								<Image
-									src='your-image-src.png'
-									alt='Your image'
-									h='50px'
-									w='50px'
-									mr='4'
-								/>
-								<Box>
-									<Box fontSize='lg'>:$TUSD</Box>
-									<Box fontSize='2xl' fontWeight='bold'>
-										200000
-									</Box>
-								</Box>
-							</Box>
-						</Card>
+						''
 					)}
 				</Box>
 			</Box>

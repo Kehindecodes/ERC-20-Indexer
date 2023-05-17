@@ -1,26 +1,57 @@
-# Simple ERC-20 Indexer
+# ERC-20 Indexer
 
-This is an skeleton app that uses the Alchemy SDK rigged to Alchemy's Enhanced APIs in order to display all of an address's ERC-20 token balances.
+ERC-20 Indexer is an application that utilizes the Alchemy SDK rigged to Alchemy's Enhanced APIs to display all ERC-20 token balances associated with a specific Ethereum address. This project aims to provide users with an easy way to view their token balances and offers various features and improvements to enhance the user experience.
 
-## Set Up
+## Features
 
-1. Install dependencies by running `npm install`
-2. Start application by running `npm run dev`
+- ERC-20 Token Balances: The ERC-20 Indexer retrieves and displays all token balances associated with a specified Ethereum address.
+- Alchemy Integration: The application utilizes the Alchemy SDK rigged to Alchemy's Enhanced APIs to efficiently retrieve the required data.
+- Wallet Integration: Users can connect their wallets to check their ERC-20 token balances.
+- Loading Indication: The application provides visual loading indicators to indicate when a request is in progress, improving the user experience.
+- Error Handling: The application includes error checking for incorrectly formed requests and provides informative feedback to the user.
+- Image and Grid Display: Token images and the overall grid layout have been improved for a more polished look and feel.
+- Performance Optimization: The application has been optimized to provide faster query response times, ensuring efficient data retrieval.
 
-## Challenge
+## Getting Started
 
-Fork this repo and build out more features! This is minimalistic on purpose.
+To get started with the ERC-20 Indexer on your local machine, follow these steps:
 
-We purposefully built this app to be minimalistic so that you can get some software development practice in fixing our bugs! 🪲
+### Prerequisites
 
-Here are a few challenge suggestions:
+- Node.js (v14.0.0 or later)
 
-1. Add Wallet integration so that any user that connects their wallet can check their ERC-20 token balance
-2. There is no indication of a request in progress... that's bad UX! Do you think you can add some sort of indication of loading?
-3. Add some styling! 🎨
-4. The token balances can sometimes be a little long and break the outline of the page... can you fix that? 🔧
-5. There is no error-checking for wrongly formed requests, or really any error checking of any kind... can you add some in?
-6. The images and grid display could look better... anything you can do about that?
-7. There are ways to make this app faster... can you implement some of them? How can the query be made _even_ quicker?
-8. Can you add ENS support for inputs?
-9. Completely open-ended!! Use this as the base for your next hackathon project, dream company or personal expedition :)
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/your-username/erc20-indexer.git
+   ```
+
+2. Install the dependencies:
+
+   ```bash
+   cd erc20-indexer
+   npm install
+   ```
+
+### Usage
+
+1. Obtain an Alchemy API key from [Alchemy](https://www.alchemy.com/).
+
+2. Set your Alchemy API key as an environment variable. You can create a `.env` file in the root directory and add the following line:
+
+   ```plaintext
+   ALCHEMY_API_KEY=YOUR_ALCHEMY_API_KEY
+   ```
+
+3. Start the application:
+
+   ```bash
+   npm start
+   ```
+
+4. Open your web browser and navigate to `http://localhost:3000`.
+
+
+Happy indexing with the ERC-20 Indexer!
